@@ -21,3 +21,4 @@ ps_mod <- gam(y ~ s(wtkg) + symptom + karnof + s(cd80) + s(cd40) + s(cd820) +
               data = df_gam, family = "binomial")
 summary(ps_mod)
 
+predict(ps_mod, type = "response")
