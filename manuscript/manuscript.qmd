@@ -32,21 +32,59 @@ bibliography: bibliography.bib
 
 ## Introduction {#sec-intro}
 
-Assessing the distribution of an observed variable is an issue of keen interest to many areas of statistical practice.  Density estimates are often part of exploratory data analysis (EDA) to help an analyst understand how the observed data are distributed.  In addition, many statistical procedures rely of specific distributional assumptions about the data:  classic parametric tests such as a t-test rely on the assumption that the data come from a normal population;  Traditional linear regression analysis assumes the model residuals follow a normal distribution; data that follows a multimodal distribution may lead a practitioner to perform mixture modeling.  
+Assessing the distribution of an observed variable is an issue of keen interest to many areas of statistical practice. Density estimates are often part of exploratory data analysis (EDA) to help an analyst understand how the observed data are distributed. In addition, many statistical procedures rely of specific distributional assumptions about the data: classic parametric tests such as a t-test rely on the assumption that the data come from a normal population; Traditional linear regression analysis assumes the model residuals follow a normal distribution; data that follows a multimodal distribution may lead a practitioner to perform mixture modeling.
 
-When data are fully observed there are a host of methods for estimating the probability density function; here we focus on kernel density estimation.  
+When data are fully observed there are a host of methods for estimating the probability density function; here we focus on kernel density estimation.
 
 <!-- Note to self: What about qq plots in the presence of missing data.  You can use density estimation as a regression diagnostic.  What about other regression diagnostics like a qq plot?  -->
 
+@ElmoreEtAl2006 @Dubnicka2009 Based on Horvitz-Thompson estimator (@HorvitzThompson1952)
 
-@ElmoreEtAl2006
-@Dubnicka2009 Based on Horvitz-Thompson estimator (@HorvitzThompson1952)
+Saloui: https://www.tandfonline.com/doi/abs/10.1080/03610926.2016.1205618
+
+## Sim settings {#sec-sim}
+
+Sample size?
+Number of imputations?
+Imputation method: pmm, norm, etc?
+
+True Distribution of Y: 
+1. Normal
+2. Chi squared
+3. Mixture of Normals
+
+Missingness: 
+1. MCAR
+2. MAR
+3. MNAR?????
+
+Missing rate: 
+1. Low 15ish
+2. Medium 30ish
+3. High 50ish
+
+Combining Rules: 
+1. stacking and then one density estimate
+2. estimating and the combining 
+
+
+
+
+
+
+
+
+
 
 
 ## Methods {#sec-meth}
 
+## Real data
+Fish: 
+Aging the fish you have to kill the fish. 
 
 
+AIDS: 
 
 ## Conclusion {#sec-conc}
 
@@ -60,8 +98,6 @@ Deidentified data have been made available at the following URL: XX.
 
 ## Supplementary Material {.supplementary}
 
+## BibTeX
 
-## BibTeX 
-
-We encourage you to use BibTeX.
-If you have, please feel free to use the package natbib with any bibliography style you're comfortable with. The .bst file agsm has been included here for your convenience. 
+We encourage you to use BibTeX. If you have, please feel free to use the package natbib with any bibliography style you're comfortable with. The .bst file agsm has been included here for your convenience.
