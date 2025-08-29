@@ -41,14 +41,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 
 \providecommand{\tightlist}{%
@@ -81,10 +95,6 @@
 \addtolength{\textwidth}{1in}%
 \addtolength{\textheight}{1.7in}%
 \addtolength{\topmargin}{-1in}%
-\makeatletter
-\makeatother
-\makeatletter
-\makeatother
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -121,30 +131,24 @@
 \newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
 \makeatother
 \makeatletter
+\makeatother
+\makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-\makeatletter
-\@ifpackageloaded{tcolorbox}{}{\usepackage[skins,breakable]{tcolorbox}}
-\makeatother
-\makeatletter
-\@ifundefined{shadecolor}{\definecolor{shadecolor}{rgb}{.97, .97, .97}}
-\makeatother
-\makeatletter
-\makeatother
-\makeatletter
-\makeatother
+
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
 \usepackage[]{natbib}
 \bibliographystyle{agsm}
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\usepackage{bookmark}
+
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Title},
-  pdfauthor={Author 1; Author 2},
+  pdftitle={Multiple Imputation for Kernel Density Estimation},
+  pdfauthor={Ryan Elmore; Sean Kerr; Gregory J. Matthews},
   pdfkeywords={3 to 6 keywords, that do not appear in the title},
   colorlinks=true,
   linkcolor={blue},
@@ -152,6 +156,7 @@
   citecolor={Blue},
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
+
 
 
 \begin{document}
@@ -163,15 +168,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{July 23, 2024}
-\title{\bf Title}
+\date{May 27, 2025}
+\title{\bf Multiple Imputation for Kernel Density Estimation}
 \author{
-Author 1\thanks{The authors gratefully acknowledge \emph{please remember
-to list all relevant funding sources in the non-anonymized (unblinded)
-version}.}\\
-Department of YYY, University of XXX\\
-and\\Author 2\\
-Department of ZZZ, University of WWW\\
+Ryan Elmore\thanks{The authors gratefully acknowledge \emph{please
+remember to list all relevant funding sources in the non-anonymized
+(unblinded) version}.}\\
+Department of Statistics, University of Denver\\
+and\\Sean Kerr\\
+Department of Mathematics and Statistics, Loyola University Chicago\\
+and\\Gregory J. Matthews\\
+Department of Mathematics and Statistics, Loyola University Chicago\\
 }
 \maketitle
 
@@ -187,199 +194,64 @@ The text of your abstract. 200 or fewer words.
 
 \newpage
 \spacingset{1.9} % DON'T change the spacing!
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, interior hidden, breakable, enhanced, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
 
-\hypertarget{sec-intro}{%
-\section{Introduction}\label{sec-intro}}
 
-Body of paper. Margins in this document are roughly 0.75 inches all
-around, letter size paper.
+\section{Introduction}\label{sec-intro}
 
-\begin{figure}
+Assessing the distribution of an observed variable is an issue of keen
+interest to many areas of statistical practice. Density estimates are
+often part of exploratory data analysis (EDA) to help an analyst
+understand how the observed data are distributed. In addition, many
+statistical procedures rely of specific distributional assumptions about
+the data: classic parametric tests such as a t-test rely on the
+assumption that the data come from a normal population; Traditional
+linear regression analysis assumes the model residuals follow a normal
+distribution; data that follows a multimodal distribution may lead a
+practitioner to perform mixture modeling.
 
-{\centering \includegraphics[width=3in,height=\textheight]{fig1.pdf}
+When data are fully observed there are a host of methods for estimating
+the probability density function; here we focus on kernel density
+estimation.
 
-}
+\citet{ElmoreEtAl2006} \citet{Dubnicka2009} Based on Horvitz-Thompson
+estimator (\citet{HorvitzThompson1952})
 
-\caption{\label{fig-first}Consistency comparison in fitting surrogate
-model in the tidal power example.}
+Saloui:
+https://www.tandfonline.com/doi/abs/10.1080/03610926.2016.1205618
 
-\end{figure}
+\section{Sim settings}\label{sec-sim}
 
-\hypertarget{tbl-one}{}
-\begin{longtable}[]{@{}lllll@{}}
-\caption{\label{tbl-one}D-optimality values for design X under five
-different scenarios.}\tabularnewline
-\toprule\noalign{}
-one & two & three & four & five \\
-\midrule\noalign{}
-\endfirsthead
-\toprule\noalign{}
-one & two & three & four & five \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-1.23 & 3.45 & 5.00 & 1.21 & 3.41 \\
-1.23 & 3.45 & 5.00 & 1.21 & 3.42 \\
-1.23 & 3.45 & 5.00 & 1.21 & 3.43 \\
-\end{longtable}
+Sample size? Number of imputations? Imputation method: pmm, norm, etc?
 
-\begin{itemize}
-\tightlist
-\item
-  Note that figures and tables (such as Figure~\ref{fig-first} and
-  Table~\ref{tbl-one}) should appear in the paper, not at the end or in
-  separate files.
-\item
-  In document front matter, you may set the key \texttt{blinded} under a
-  \texttt{journal} key to hide the authors and acknowledgements,
-  producing the required anonymized version.
-\item
-  Remember that in the anonymized version, you should not identify
-  authors indirectly in the text. That is, don't say ``In Smith et.
-  al.~(2009) we showed that \ldots{}''. Instead, say ``Smith et.
-  al.~(2009) showed that \ldots{}''.
-\item
-  These points are only intended to remind you of some requirements.
-  Please refer to the instructions for authors at
-  \url{http://amstat.tandfonline.com/action/authorSubmission?journalCode=uasa20\&page=instructions\#.VFkk7fnF_0c}
-\item
-  For more about ASA~style, please see
-  \url{https://files.taylorandfrancis.com/asa-style-guide.pdf}.
-\item
-  If you have supplementary material (e.g., software, data, technical
-  proofs), identify them in the section below. In early stages of the
-  submission process, you may be unsure what to include as supplementary
-  material. Don't worry---this is something that can be worked out at
-  later stages.
-\end{itemize}
+True Distribution of Y: 1. Normal 2. Chi squared 3. Mixture of Normals
 
-\hypertarget{sec-meth}{%
-\section{Methods}\label{sec-meth}}
+Missingness: 1. MCAR 2. MAR 3. MNAR?????
 
-Don't take any of these section titles seriously. They're just for
-illustration.
+Missing rate: 1. Low 15ish 2. Medium 30ish 3. High 50ish
 
-\hypertarget{sec-verify}{%
-\section{Verifications}\label{sec-verify}}
+Combining Rules: 1. stacking and then one density estimate 2. estimating
+and the combining
 
-This section will be just long enough to illustrate what a full page of
-text looks like, for margins and spacing.
+\section{Methods}\label{sec-meth}
 
-\addtolength{\textheight}{.5in}%
+\section{Real data}\label{real-data}
 
-\citet{gelm:veht:2021} offer some guidance about key ideas about
-statistical ideas. On an unrelated note, spreadsheets are important to
-use correctly \citep{brom:woo:2018}. Log-linear models are an attractive
-way to model categorical data \citep{bish:fien:1975}.
+Fish: Aging the fish you have to kill the fish.
 
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. \textbf{With this spacing we
-have 25 lines per page.} The quick brown fox jumped over the lazy dog.
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
+AIDS:
 
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
+\section{Conclusion}\label{sec-conc}
 
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-\addtolength{\textheight}{-.5in}%
-
-\addtolength{\textheight}{.2in}%
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-The quick brown fox jumped over the lazy dog. The quick brown fox jumped
-over the lazy dog. The quick brown fox jumped over the lazy dog. The
-quick brown fox jumped over the lazy dog.
-
-\addtolength{\textheight}{-.2in}%
-
-\hypertarget{sec-conc}{%
-\section{Conclusion}\label{sec-conc}}
-
-\hypertarget{disclosure-statement}{%
-\section{Disclosure statement}\label{disclosure-statement}}
+\section{Disclosure statement}\label{disclosure-statement}
 
 The authors have the following conflicts of interest to declare (or
 replace with a statement that no conflicts of interest exist).
 
-\hypertarget{data-availability-statement}{%
-\section{Data Availability
-Statement}\label{data-availability-statement}}
+\section{Data Availability Statement}\label{data-availability-statement}
 
 Deidentified data have been made available at the following URL: XX.
 
-\hypertarget{supplementary-material}{}
+\phantomsection\label{supplementary-material}
 \bigskip
 
 \begin{center}
@@ -388,20 +260,7 @@ Deidentified data have been made available at the following URL: XX.
 
 \end{center}
 
-\begin{description}
-\item[Title:]
-Brief description. (file type)
-\item[R-package for MYNEW routine:]
-R-package MYNEW containing code to perform the diagnostic methods
-described in the article. The package also contains all datasets used as
-examples in the article. (GNU zipped tar file)
-\item[HIV data set:]
-Data set used in the illustration of MYNEW method in
-Section~\ref{sec-verify} (.txt file).
-\end{description}
-
-\hypertarget{bibtex}{%
-\section{BibTeX}\label{bibtex}}
+\section{BibTeX}\label{bibtex}
 
 We encourage you to use BibTeX. If you have, please feel free to use the
 package natbib with any bibliography style you're comfortable with. The
@@ -409,6 +268,7 @@ package natbib with any bibliography style you're comfortable with. The
 
 
   \bibliography{bibliography.bib}
+
 
 
 \end{document}

@@ -4,12 +4,12 @@ library(mice)
 library(plotly)
 library(philentropy)
 
-set.seed()
+set.seed(12)
 M <- 20
 n <- 100
 rho <- 0.5
 missing_type <- 'MAR'
-nsim <- 1000
+nsim <- 10
 method <- "norm"
 combined_mean_density_list <- results_list <- list()
 results_df <- data.frame()
@@ -24,7 +24,7 @@ results_df <- data.frame()
 
 for (method in c("norm","pmm")){
 for (n in c(30, 100, 200, 300, 400, 500)){print(paste0("n=",n))
-for (M in c(5, 10, 25, 50,  100)){print(paste0("m=",m))
+for (M in c(5, 10, 25)){print(paste0("m=",M))
 for (j in 1:nsim){print(j)
 # create dataset
 #multivariate normal setting
@@ -43,8 +43,8 @@ dat <- as.data.frame(mvtnorm::rmvnorm(n=n, mean=mu, sigma = sigma))
 #dat missing has missingness on it.  
 dat_missing <- dat
 
-apply(dat, 2, mean)
-apply(dat_missing, 2, mean, na.rm = TRUE)
+#apply(dat, 2, mean)
+#apply(dat_missing, 2, mean, na.rm = TRUE)
 
 
 #Using the ampute function
@@ -153,36 +153,33 @@ combined_dens4 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512
 #Combining method 5
 ########################
 #Stack and just treat the entire stack as a single data set.  
-combined_dens5 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512)$y)
+#combined_dens5 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512)$y)
 
-# 
-# ggplot() +
-#   geom_density(aes(x = V1, color = "Original"), data = dat) +
-#   geom_density(aes(x = V1, color = "Missing"), data = dat_missing) +
-#   geom_path(aes(x = x, y= y, group = as.factor(M), color = "Individual Imputation"), data = imp_dens_stacked) +
-#   theme_bw() +
-#   geom_path(aes(x = x, y = y, color = "Imputed Combined: 1"),
-#             data = combined_dens1) +
-#   geom_path(aes(x = x, y = y, color = "Imputed Combined: 2"),
-#             data = combined_dens2) +
-#   geom_path(aes(x = x, y = y, color = "Imputed Combined: 3"),
-#             data = combined_dens3) +
-#   geom_path(aes(x = x, y = y, color = "Imputed Combined: 4"),
-#             data = combined_dens4) + 
-#   geom_path(aes(x = x, y = y, color = "Imputed Combined: 5"),
-#             data = combined_dens5) + 
-#   stat_function(aes(color = "Truth"), fun = dnorm, args = list(mean = 0, sd = 1)) +
-#   scale_color_manual(
-#     values = c(
-#       'Truth' = 'gold',
-#       'Original' = 'black',
-#       'Missing' = 'red',
-#       'Individual Imputation' = 'lightgray',
-#       'Imputed Combined: 1' = 'blue',
-#       'Imputed Combined: 2' = 'orange',
-#       'Imputed Combined: 3' = 'darkgreen',
-#       'Imputed Combined: 4' = 'purple',
-#       'Imputed Combined: 5' = 'pink'))
+
+ggplot() +
+  geom_density(aes(x = V1, color = "Original"), data = dat) +
+  geom_density(aes(x = V1, color = "Missing"), data = dat_missing) +
+  geom_path(aes(x = x, y= y, group = as.factor(M), color = "Individual Imputation"), data = imp_dens_stacked) +
+  theme_bw() +
+  geom_path(aes(x = x, y = y, color = "Imputed Combined: 1"),
+            data = combined_dens1) +
+  geom_path(aes(x = x, y = y, color = "Imputed Combined: 2"),
+            data = combined_dens2) +
+  geom_path(aes(x = x, y = y, color = "Imputed Combined: 3"),
+            data = combined_dens3) +
+  geom_path(aes(x = x, y = y, color = "Imputed Combined: 4"),
+            data = combined_dens4) +
+  stat_function(aes(color = "Truth"), fun = dnorm, args = list(mean = 0, sd = 1)) +
+  scale_color_manual(
+    values = c(
+      'Truth' = 'gold',
+      'Original' = 'black',
+      'Missing' = 'red',
+      'Individual Imputation' = 'lightgray',
+      'Imputed Combined: 1' = 'blue',
+      'Imputed Combined: 2' = 'orange',
+      'Imputed Combined: 3' = 'darkgreen',
+      'Imputed Combined: 4' = 'purple'))
 
 
   
@@ -208,7 +205,7 @@ imp1 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens1$y*diff(orig_x)[1]))
 imp2 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens2$y*diff(orig_x)[1])))^2)
 imp3 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens3$y*diff(orig_x)[1])))^2)
 imp4 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens4$y*diff(orig_x)[1])))^2)
-imp5 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens5$y*diff(orig_x)[1])))^2)
+#imp5 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens5$y*diff(orig_x)[1])))^2)
 
 #Kullback Liebler
 # orig <- KL(rbind(orig_y/sum(orig_y), truth_y/sum(truth_y)))
@@ -224,14 +221,13 @@ imp5 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens5$y*diff(orig_x)[1]))
 results_list[[j]] <- c('Original'=orig, 'Missing'=missing, 'Imp1'= imp1,
                        'Imp2'= imp2,
                        'Imp3'= imp3,
-                       'Imp4'= imp4,
-                       'Imp5'= imp5)
+                       'Imp4'= imp4)
 #results
 #combined_mean_density_list[[j]] <- data.frame(isim = j, combined_dens_mean_dens)
 
 }
 
-results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  %>% pivot_longer(cols = everything()) %>% mutate(M=M, n = n, missing_type= missing_type, method = method))
+results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  %>% pivot_longer(cols = everything()) %>% mutate(M=M, n = n, missing_type= missing_type, method = method, id = rep(1:nsim, each = 6)))
 
 }
 }
