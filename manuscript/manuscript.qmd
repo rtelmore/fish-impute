@@ -30,6 +30,9 @@ keywords:
 bibliography: bibliography.bib  
 ---
 
+<!-- Note: Possible journals to submit to: CSDA  -->
+
+
 ## Introduction {#sec-intro}
 
 Assessing the distribution of an observed variable is an issue of keen interest to many areas of statistical practice. Density estimates are often part of exploratory data analysis (EDA) to help an analyst understand how the observed data are distributed. In addition, many statistical procedures rely of specific distributional assumptions about the data: classic parametric tests such as a t-test rely on the assumption that the data come from a normal population; Traditional linear regression analysis assumes the model residuals follow a normal distribution; data that follows a multimodal distribution may lead a practitioner to perform mixture modeling.
