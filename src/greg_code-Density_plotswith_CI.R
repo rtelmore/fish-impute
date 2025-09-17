@@ -212,5 +212,7 @@ ggplot(aes(x = Grouped, y = Grouped - `Avg BW`), data = rezzies) + geom_point()
 
 
 
+#Confidence intervals.  
+
 
 

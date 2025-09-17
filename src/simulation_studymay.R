@@ -24,9 +24,8 @@ results_df <- data.frame()
 #COmbining methods Imp1-Imp4, CCA
 
 
-for (method in c("norm","pmm")){
+
 for (n in c(30, 100, 200, 300, 400, 500)){print(paste0("n=",n))
-for (M in c(5, 10, 25,50,100)){print(paste0("m=",M))
 for (j in 1:nsim){print(j)
 # create dataset
 #multivariate normal setting
@@ -35,6 +34,9 @@ mu <- c(0, 0)
 #correlation 0.5
 sigma <- matrix(c(1, rho, rho, 1), nrow = 2)
 dat <- as.data.frame(mvtnorm::rmvnorm(n=n, mean=mu, sigma = sigma))
+
+#Skewed data 
+dat$V1 <- qchisq(pnorm(dat$V1), 5)
 
 #Skewed data 
 #dat$V1 <- qchisq(pnorm(dat$V1), 5)
@@ -68,19 +70,26 @@ if (missing_type == "MCAR"){
 }
 
 
+
+for (method in c("norm","pmm")){
+  for (M in c(5, 10, 25,50,100)){print(paste0("m=",M))
+    
+
 # impute data
 imputed <- mice(dat_missing, print=FALSE, m=M, method = method)
 
+imp_data_stacked <- complete(imputed, "long")
+
 #Complete the M imputed data sets
-imp_dens_stacked <- imp_data_stacked <- data.frame()
+imp_dens_stacked  <- data.frame()
 for (i in 1:M){
-imp_data <- complete(imputed, i)
-imp_data$M <- i
-imp_data_stacked <- bind_rows(imp_data_stacked, imp_data)
+# imp_data <- complete(imputed, i)
+# imp_data$M <- i
+# imp_data_stacked <- bind_rows(imp_data_stacked, imp_data)
 
 #Density function uses method "nrd0" by default for computing bandwidth
-imp_dens <- data.frame(x=density(imp_data$V1, from=-3, to=3, n=512)$x,
-                       y=density(imp_data$V1, from=-3, to=3, n=512)$y)
+imp_dens <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$.imp == i], from=-3, to=3, n=512)$x,
+                       y=density(imp_data_stacked$V1[imp_data_stacked$.imp == i], from=-3, to=3, n=512)$y)
 imp_dens$M <- i
 imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 }

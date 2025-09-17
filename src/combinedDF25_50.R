@@ -21,5 +21,7 @@ medians_tbl <- combin_df %>%
 
 medians_tbl
 
+medians_tbl %>% ggplot(aes(x = M, y = median_val, color = factor(n))) + geom_point() + geom_line() + facet_grid(name~corr + method)
+
 medians <- ddply(combin_df,.(TYPE),summarise,med = median(combin_df))
 tabmedians()
