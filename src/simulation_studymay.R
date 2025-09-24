@@ -95,6 +95,7 @@ imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 }
 
 
+
 #ggplot(aes(x = x, y= y, group = as.factor(M)), data = imp_dens_stacked) + geom_path(color = rgb(0,0,0,0.25)) + theme_bw()
 ########################
 #Combining method 1
@@ -245,7 +246,7 @@ results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  
 }
 
 end <- Sys.time()
-save(results_df, file = "/Users/maynorman/Desktop/fish-impute-git/results_20250829_mar_norm.RData")
+save(results_df, file = "/Users/maynorman/Desktop/fish-impute-git/results_20250922_mar_norm.RData")
 
 time <- end-start
 print(time)
