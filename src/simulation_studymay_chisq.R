@@ -7,13 +7,14 @@ library(philentropy)
 start <- Sys.time()
 
 set.seed(12)
+n_interval <- 2048
 M <- 20
 n <- 100
 rho <- 0.5
 missing_type <- 'MAR'
 nsim <- 10
 method <- "norm"
-combined_mean_density_list <- results_list <- list()
+combined_mean_density_list <- list()
 results_df <- data.frame()
 #Mice: method pmm, norm, mean
 #Add in true density: normal, skewed, mixture of normals.  (Fully obs variable is always normal.  Change the distribution of the one with missingness.  )
@@ -23,7 +24,7 @@ results_df <- data.frame()
 #M: 5, 10, 25, 50, 100
 #COmbining methods Imp1-Imp4, CCA
 
-
+mvec <- c(5, 10, 25,50,100)
 
 for (n in c(30, 100, 200, 300, 400, 500)){print(paste0("n=",n))
 for (j in 1:nsim){print(j)
@@ -70,6 +71,7 @@ if (missing_type == "MCAR"){
 }
 
 
+results_list <- list()
 
 for (method in c("norm","pmm")){
 
@@ -78,15 +80,15 @@ imputed <- mice(dat_missing, print=FALSE, m=100, method = method)
 imp_data_stacked <- complete(imputed, "long")
 imp_data_stacked$M <- imp_data_stacked$.imp
   
-  for (M in c(5, 10, 25,50,100)){print(paste0("m=",M))
+  for (M in mvec){print(paste0("m=",M))
     
 #Complete the M imputed data sets
 imp_dens_stacked  <- data.frame()
 for (i in 1:M){
 
 #Density function uses method "nrd0" by default for computing bandwidth
-imp_dens <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=512)$x,
-                       y=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=512)$y)
+imp_dens <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=n_interval)$x,
+                       y=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=n_interval)$y)
 imp_dens$M <- i
 imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 }
@@ -101,7 +103,7 @@ imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 #Each data set gets a different nrd0
 #We combing across densities
 #Combining density estimators
-combined_dens1 <- imp_dens_stacked %>% group_by(x) %>% summarize(y = mean(y))
+combined_dens1 <- imp_dens_stacked %>% filter(M <= M) %>% group_by(x) %>% summarize(y = mean(y))
 
 ########################
 #Combining method 2
@@ -109,7 +111,7 @@ combined_dens1 <- imp_dens_stacked %>% group_by(x) %>% summarize(y = mean(y))
 #Could also use Sheather Jones for computing bandwidth
 #Here we average nrd0 across imputations
 #Computing nrd0 bandwidth estimate across the different imputations
-mean_nrd0 <- imp_data_stacked %>% 
+mean_nrd0 <- imp_data_stacked %>% filter(M <= M) %>% 
   group_by(M) %>%
   summarize(nrd0fn = bw.nrd0(V1),
             sd = sd(V1),
@@ -120,13 +122,13 @@ mean_nrd0 <- imp_data_stacked %>%
   mean()
 
 #Computing density estimator with all the data and using the mean bandwidth across imputations
-combined_dens2 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = mean_nrd0)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = mean_nrd0)$y)
+combined_dens2 <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = mean_nrd0)$x, y=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = mean_nrd0)$y)
 
 ########################
 #Combining method 3
 ########################
 #Here we average sd and iqr across imputations and then compute a single nrd0
-min_for_nrd0 <- imp_data_stacked %>% 
+min_for_nrd0 <- imp_data_stacked %>% filter(M <= M) %>% 
   group_by(M) %>%
   summarize(nrd0fn = bw.nrd0(V1),
             sd = sd(V1),
@@ -139,14 +141,14 @@ min_for_nrd0 <- imp_data_stacked %>%
 stacked_bw <- 0.9 * min_for_nrd0 * n^-0.2
             
 #Computing density estimator with all the data and using the mean bandwidth across imputations
-combined_dens3 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = stacked_bw)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = stacked_bw)$y)
+combined_dens3 <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = stacked_bw)$x, y=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = stacked_bw)$y)
 
 
 ########################
 #Combining method 4
 ########################
 #Compute band width using all the stacked data and then find density estimator on full stacked data 
-mean_nrd0 <- imp_data_stacked %>% 
+mean_nrd0 <- imp_data_stacked %>% filter(M <= M) %>%
   summarize(nrd0fn = bw.nrd0(V1),
             sd = sd(V1),
             iqr = IQR(V1),
@@ -156,13 +158,13 @@ mean_nrd0 <- imp_data_stacked %>%
   mean()
 
 #Computing density estimator with all the data and using the mean bandwidth across imputations
-combined_dens4 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = mean_nrd0)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512, bw = mean_nrd0)$y)
+combined_dens4 <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = mean_nrd0)$x, y=density(imp_data_stacked$V1[imp_data_stacked$M <= M], from=-3, to=18, n=n_interval, bw = mean_nrd0)$y)
 
 ########################
 #Combining method 5
 ########################
 #Stack and just treat the entire stack as a single data set.  
-#combined_dens5 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=512)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=512)$y)
+#combined_dens5 <- data.frame(x=density(imp_data_stacked$V1, from=-3, to=3, n=n_interval)$x, y=density(imp_data_stacked$V1, from=-3, to=3, n=n_interval)$y)
 
 
 ggplot() +
@@ -192,11 +194,11 @@ ggplot() +
 
 
   
-orig_y <- density(dat$V1, from=-3, to=3, n=512)$y # black
-missing_y <- density(na.omit(dat_missing$V1), from=-3, to=3, n=512)$y # red
+orig_y <- density(dat$V1, from=-3, to=18, n=n_interval)$y # black
+missing_y <- density(na.omit(dat_missing$V1), from=-3, to=18, n=n_interval)$y # red
 
-orig_x <- density(dat$V1, from=-3, to=3, n=512)$x
-truth_y <- dnorm(orig_x, 0, 1) # gold
+orig_x <- density(dat$V1, from=-3, to=18, n=n_interval)$x
+truth_y <- dchisq(orig_x, 5) # gold
 
 #The area between the cdfs
 # orig <- sum(abs((cumsum(truth_y*diff(orig_x)[1]) - cumsum(orig_y*diff(orig_x)[1]))))
@@ -227,16 +229,19 @@ imp4 <- sum(abs(((truth_y*diff(orig_x)[1]) - (combined_dens4$y*diff(orig_x)[1]))
 
 
 # order resulting MSEs and display
-results_list[[j]] <- c('Original'=orig, 'Missing'=missing, 'Imp1'= imp1,
+results_list[[M]] <- c('Original'=orig, 'Missing'=missing, 'Imp1'= imp1,
                        'Imp2'= imp2,
                        'Imp3'= imp3,
                        'Imp4'= imp4)
 #results
 #combined_mean_density_list[[j]] <- data.frame(isim = j, combined_dens_mean_dens)
 
-}
+  }  
 
-results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  %>% pivot_longer(cols = everything()) %>% mutate(M=M, n = n, missing_type= missing_type, method = method, id = rep(1:nsim, each = 6)))
+results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  %>% pivot_longer(cols = everything()) %>% mutate(M=rep(mvec,each = 6), n = n, missing_type= missing_type, method = method, id = j))
+
+
+
 
 }
 }
@@ -280,7 +285,7 @@ for (m in 1:M){print(m)
   for (i in 1:nboots){
   temp <- imp_data_stacked %>% filter(M == m)
   boot <- temp[sample(1:nrow(temp),nrow(temp), replace = TRUE),]
-  boot_dens <- data.frame(x=density(boot$V1, from=-4, to=4, n=512)$x, y=density(boot$V1, from=-4, to=4, n=512)$y)
+  boot_dens <- data.frame(x=density(boot$V1, from=-4, to=4, n=n_interval)$x, y=density(boot$V1, from=-4, to=4, n=n_interval)$y)
   boot_dens$i <- i
   boot_dens_stacked <- bind_rows(boot_dens_stacked, boot_dens)
   }

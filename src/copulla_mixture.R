@@ -1,3 +1,4 @@
+n <- 10000
 #Mean 0,0
 mu <- c(0, 0)
 #correlation 0.5
@@ -24,6 +25,7 @@ Finv_mix2 <- function(p){
 }
 Finv_mix2(0.7)
 Finv_mix2 <- Vectorize(Finv_mix2)
-y <- Finv_mix2(pnorm(dat$V1))
-hist(y)
+dat$V1 <- Finv_mix2(pnorm(dat$V1))
+plot(dat)
+cor(dat)
 
