@@ -1,8 +1,5 @@
-
-
 library(plyr)
 library(tab)
-
 
 
 load("../fish_impute_git/results_20250903_mar_norm_cor25.RData") 
@@ -44,3 +41,8 @@ combin_df = bind_rows(resultsdf25chi, resultsdf50chi)
 
 ggplot(combin_df,facet_grid(rows = corr, cols = M))
 combin_df %>%filter(name %in% c("Original","Missing","Imp1")) %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~n+method)
+
+
+#table data type, separate data type and distribution
+#pivot longer. P m n cca 1 2 
+#do mixture. 

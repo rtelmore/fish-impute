@@ -10,9 +10,7 @@ library(copula)
 
 
 
-
-
-set.seed()
+set.seed(23)
 M <- 20
 n <- 100
 rho <- 0.5
@@ -32,7 +30,7 @@ results_df <- data.frame()
 
 for (method in c("norm","pmm")){
   for (n in c(30, 100, 200, 300, 400, 500)){print(paste0("n=",n))
-    for (M in c(5, 10, 25, 50,  100)){print(paste0("m=",m))
+    for (M in c(5, 10, 25, 50,  100)){print(paste0("m=",M))
       for (j in 1:nsim){print(j)
         # create dataset
         #multivariate normal setting
