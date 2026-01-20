@@ -9,7 +9,6 @@ library(copula)
 
 
 
-
 set.seed(23)
 M <- 20
 n <- 100

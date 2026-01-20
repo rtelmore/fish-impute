@@ -10,9 +10,9 @@ set.seed(12)
 n_interval <- 2048
 M <- 20
 n <- 100
-rho <- 0.5
+rho <- 0.25
 missing_type <- 'MAR'
-nsim <- 10
+nsim <- 1000
 method <- "norm"
 combined_mean_density_list <- list()
 results_df <- data.frame()
@@ -92,7 +92,6 @@ imp_dens <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M == i], f
 imp_dens$M <- i
 imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 }
-
 
 
 #ggplot(aes(x = x, y= y, group = as.factor(M)), data = imp_dens_stacked) + geom_path(color = rgb(0,0,0,0.25)) + theme_bw()
@@ -248,7 +247,7 @@ results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  
 }
 
 end <- Sys.time()
-save(results_df, file = "/Users/maynorman/Desktop/fish-impute-git/results_20250922_mar_norm.RData")
+save(results_df, file = "/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.25.RData")
 
 time <- end-start
 print(time)

@@ -11,7 +11,7 @@ M <- 20
 n <- 100
 rho <- 0.5
 missing_type <- 'MAR'
-nsim <- 10
+nsim <- 1000
 method <- "norm"
 combined_mean_density_list <- results_list <- list()
 results_df <- data.frame()
