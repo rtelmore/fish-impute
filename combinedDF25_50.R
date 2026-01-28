@@ -10,8 +10,8 @@ resultsdf50 = results_df %>%
   mutate(corr = .50)
 
 combin_df = bind_rows(resultsdf25, resultsdf50)
-
-ggplot(combin_df,facet_grid(rows = corr, cols = M))
+#plot normal results
+#ggplot(combin_df,facet_grid(rows = corr, cols = M))
 combin_df %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~M+method)
 
 medians_tbl <- combin_df %>%
@@ -30,19 +30,32 @@ library(tab)
 
 
 
-load("/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.25.RData") 
+load("../fish_impute_git/src/results_mar_chisq_0.25.RData") 
 resultsdf25chi = results_df %>%
   mutate(corr = .25)
-load("/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.5.RData")
+load("../fish_impute_git/src/results_mar_chisq_0.5.RData")
 resultsdf50chi = results_df %>%
   mutate(corr = .50)
 
 combin_df = bind_rows(resultsdf25chi, resultsdf50chi)
-
-ggplot(combin_df,facet_grid(rows = corr, cols = M))
+#plot chi sq results
+#ggplot(combin_df,facet_grid(rows = corr, cols = M))
 combin_df %>%filter(name %in% c("Original","Missing","Imp1")) %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~n+method)
 
 
 #table data type, separate data type and distribution
 #pivot longer. P m n cca 1 2 
 #do mixture. 
+
+load("../fish_impute_git/src/results_mar_mixture_0.25.RData") 
+resultsdf25mix = results_df %>%
+  mutate(corr = .25)
+load("../fish_impute_git/src/results_mar_chisq_0.5.RData")
+resultsdf50chi = results_df %>%
+  mutate(corr = .50)
+
+combin_df = bind_rows(resultsdf25mix, resultsdf50chi)
+#plot chi sq results
+#ggplot(combin_df,facet_grid(rows = corr, cols = M))
+combin_df %>%filter(name %in% c("Original","Missing","Imp1")) %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~n+method)
+

@@ -1,3 +1,4 @@
+start = Sys.time()
 n <- 10000
 #Mean 0,0
 mu <- c(0, 0)
@@ -28,4 +29,6 @@ Finv_mix2 <- Vectorize(Finv_mix2)
 dat$V1 <- Finv_mix2(pnorm(dat$V1))
 plot(dat)
 cor(dat)
-
+hist(dat$V1)
+end = Sys.time()
+runtime = end-start

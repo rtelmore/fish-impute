@@ -7,12 +7,12 @@ library(philentropy)
 library(nor1mix)
 library(copula)
 
-
+start <- Sys.time()
 
 set.seed(23)
 M <- 20
 n <- 100
-rho <- 0.5
+rho <- 0.25
 missing_type <- 'MAR'
 nsim <- 1000
 method <- "norm"
@@ -255,7 +255,9 @@ for (method in c("norm","pmm")){
   }
 }
 
-
+end <- Sys.time()
+save(results_df, file = "/Users/maynorman/Desktop/fish_impute_git/src/results_mar_mixture_0.25.RData")
+runtime = end-start
 #save(results_df, file = "/Users/gregorymatthews/Dropbox/fishimputegit/results_MCAR_normal.RData")
 
 
