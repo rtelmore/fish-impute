@@ -2,10 +2,10 @@ library(plyr)
 library(tab)
 
 
-load("../fish_impute_git/results_20250903_mar_norm_cor25.RData") 
+load("../fish_impute_git/src/results_20250903_mar_norm_cor25.RData") 
 resultsdf25 = results_df %>%
   mutate(corr = .25)
-load("../fish_impute_git/results_20250829_mar_norm.RData")
+load("../fish_impute_git/src/results_20250829_mar_norm.RData")
 resultsdf50 = results_df %>%
   mutate(corr = .50)
 
@@ -50,11 +50,11 @@ combin_df %>%filter(name %in% c("Original","Missing","Imp1")) %>% mutate(name = 
 load("../fish_impute_git/src/results_mar_mixture_0.25.RData") 
 resultsdf25mix = results_df %>%
   mutate(corr = .25)
-load("../fish_impute_git/src/results_mar_chisq_0.5.RData")
-resultsdf50chi = results_df %>%
+load("../fish_impute_git/src/results_mar_mixture_0.5.RData")
+resultsdf50mix = results_df %>%
   mutate(corr = .50)
 
-combin_df = bind_rows(resultsdf25mix, resultsdf50chi)
+combin_df = bind_rows(resultsdf25mix, resultsdf50mix)
 #plot chi sq results
 #ggplot(combin_df,facet_grid(rows = corr, cols = M))
 combin_df %>%filter(name %in% c("Original","Missing","Imp1")) %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~n+method)
