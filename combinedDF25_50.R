@@ -12,7 +12,7 @@ resultsdf50 = results_df %>%
 combin_df = bind_rows(resultsdf25, resultsdf50)
 #plot normal results
 #ggplot(combin_df,facet_grid(rows = corr, cols = M))
-combin_df %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~M+method)
+combin_df %>%filter(name %in% c("Original","Missing","Imp1"))%>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(M))) + geom_boxplot() + facet_grid(corr~n+method)
 
 medians_tbl <- combin_df %>%
   mutate(name = substring(name, 1, 4)) %>%
