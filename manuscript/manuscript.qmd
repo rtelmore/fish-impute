@@ -71,13 +71,11 @@ Combining Rules:
 2. estimating and the combining 
 
 
+## Describe the combining rules
 
-
-
-
-
-
-
+Methods: 
+ - Stack
+ - 
 
 
 ## Methods {#sec-meth}
@@ -85,7 +83,6 @@ Combining Rules:
 ## Real data
 Fish: 
 Aging the fish you have to kill the fish. 
-
 
 AIDS: 
 
