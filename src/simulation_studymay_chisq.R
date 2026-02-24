@@ -10,7 +10,7 @@ set.seed(12)
 n_interval <- 2048
 M <- 20
 n <- 100
-rho <- 0.25
+rho <- 0.5
 missing_type <- 'MAR'
 nsim <- 1000
 method <- "norm"
@@ -59,9 +59,9 @@ dat_missing <- dat
 if (missing_type == "MAR"){
 med <- median(dat$V2)
 n1 <- sum(dat$V2 < med)
-dat_missing$V1[dat_missing$V2 < med & runif(n1) < .8] <- NA
+dat_missing$V1[dat_missing$V2 < med & runif(n1) < .2] <- NA
 n2 <- sum(dat_missing$V2 >= med)
-dat_missing$V1[dat_missing$V2 >= med & runif(n2) < .2] <- NA
+dat_missing$V1[dat_missing$V2 >= med & runif(n2) < .8] <- NA
 }
 
 
@@ -247,7 +247,7 @@ results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  
 }
 
 end <- Sys.time()
-save(results_df, file = "/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.25.RData")
+save(results_df, file = "/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.5_reversemissing.RData")
 
 time <- end-start
 print(time)
