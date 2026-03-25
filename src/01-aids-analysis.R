@@ -45,7 +45,6 @@ p + geom_histogram(aes(y = after_stat(density)), fill = "grey", col = "black") +
   labs(x = "CD4 at 96 weeks minus CD4 at Baseline",
        y = "Kernel Density Estimate") +
   theme_bw()
-?density
 
 rm(result)
 for (i in 1:m){

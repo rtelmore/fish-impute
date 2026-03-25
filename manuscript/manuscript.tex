@@ -1,25 +1,27 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
   12pt]{article}
-
+\usepackage{xcolor}
 \usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -37,9 +39,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -65,8 +64,7 @@
 \makeatother
 
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -78,17 +76,35 @@
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+\usepackage[]{natbib}
+\bibliographystyle{agsm}
+
 
 \addtolength{\oddsidemargin}{-.5in}%
 \addtolength{\evensidemargin}{-1in}%
@@ -136,19 +152,12 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
-\usepackage[]{natbib}
-\bibliographystyle{agsm}
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Multiple Imputation for Kernel Density Estimation},
-  pdfauthor={Ryan Elmore; Sean Kerr; Gregory J. Matthews},
+  pdfauthor={Ryan Elmore; Gregory J. Matthews},
   pdfkeywords={3 to 6 keywords, that do not appear in the title},
   colorlinks=true,
   linkcolor={blue},
@@ -168,15 +177,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\date{May 27, 2025}
+\date{March 25, 2026}
 \title{\bf Multiple Imputation for Kernel Density Estimation}
 \author{
 Ryan Elmore\thanks{The authors gratefully acknowledge \emph{please
 remember to list all relevant funding sources in the non-anonymized
 (unblinded) version}.}\\
-Department of Statistics, University of Denver\\
-and\\Sean Kerr\\
-Department of Mathematics and Statistics, Loyola University Chicago\\
+Department of Business Information and Analytics, University of Denver\\
 and\\Gregory J. Matthews\\
 Department of Mathematics and Statistics, Loyola University Chicago\\
 }
@@ -232,6 +239,26 @@ Missing rate: 1. Low 15ish 2. Medium 30ish 3. High 50ish
 Combining Rules: 1. stacking and then one density estimate 2. estimating
 and the combining
 
+\section{Describe the combining
+rules}\label{describe-the-combining-rules}
+
+Methods: - Stack
+
+Suppose we have \(B\) imputed data sets and we estimate \(f\) using a
+standard kernel density estimator given by
+
+\begin{equation}
+\label{eqn:kde}
+\hat{f_b}(x) = \frac1{nh_b}K\left(\frac{x - x_i}{h_b}\right) \ \ b = 1, 2 \dots, B, 
+\end{equation} where \(K\) is an appropriately chosen kernel function
+and \(h_b\) is a bandwidth select, see \citet{simonoff2012smoothing} for
+more details. We propose to estimate \(f\) by averaging over the
+individual \(B\) estimators, that is \begin{equation}
+\label{eqn:kde_combo}
+\hat{f}(x) = \frac1B\sum_{b=1}^B\hat{f}_b.
+\end{equation} Clearly, \(\hat{f}(x)\) is a proper density in that it
+integrates to one and is non-negative everywhere.
+
 \section{Methods}\label{sec-meth}
 
 \section{Real data}\label{real-data}
@@ -267,7 +294,7 @@ package natbib with any bibliography style you're comfortable with. The
 .bst file agsm has been included here for your convenience.
 
 
-  \bibliography{bibliography.bib}
+\bibliography{bibliography.bib}
 
 
 

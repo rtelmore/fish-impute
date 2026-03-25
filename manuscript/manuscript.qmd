@@ -13,11 +13,7 @@ author:
       The authors gratefully acknowledge _please remember to list all relevant funding sources in the non-anonymized (unblinded) version_.
     affiliations:
       - name: University of Denver
-        department: Department of Statistics
-  - name: Sean Kerr
-    affiliations:
-      - name: Loyola University Chicago
-        department: Department of Mathematics and Statistics
+        department: Department of Business Information and Analytics
   - name: Gregory J. Matthews
     affiliations:
       - name: Loyola University Chicago
@@ -71,12 +67,24 @@ Combining Rules:
 2. estimating and the combining 
 
 
+
 ## Describe the combining rules
 
 Methods: 
  - Stack
- - 
 
+Suppose we have $B$ imputed data sets and we estimate $f$ using a standard kernel density estimator given by 
+
+\begin{equation}
+\label{eqn:kde}
+\hat{f_b}(x) = \frac1{nh_b}K\left(\frac{x - x_i}{h_b}\right) \ \ b = 1, 2 \dots, B, 
+\end{equation}
+where $K$ is an appropriately chosen kernel function and $h_b$ is a bandwidth select, see \citet{simonoff2012smoothing} for more details. We propose to estimate $f$ by averaging over the individual $B$ estimators, that is 
+\begin{equation}
+\label{eqn:kde_combo}
+\hat{f}(x) = \frac1B\sum_{b=1}^B\hat{f}_b.
+\end{equation}
+Clearly, $\hat{f}$ is a proper density in that each individual density estimator $\hat{f}_b$ integrates to one and is non-negative everywhere. 
 
 ## Methods {#sec-meth}
 
