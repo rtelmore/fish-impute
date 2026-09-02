@@ -247,7 +247,7 @@ results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  
 }
 
 end <- Sys.time()
-save(results_df, file = "/Users/maynorman/Desktop/fish_impute_git/src/results_mar_chisq_0.5_reversemissing.RData")
+save(results_df, file = "./src/results_mar_chisq_0.5_reversemissing.RData")
 
 time <- end-start
 print(time)

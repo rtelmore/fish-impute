@@ -4,8 +4,6 @@ library(mice)
 library(plotly)
 library(philentropy)
 
-start <- Sys.time()
-
 set.seed(12)
 M <- 20
 n <- 100
@@ -24,8 +22,9 @@ results_df <- data.frame()
 #COmbining methods Imp1-Imp4, CCA
 
 
-
+for (method in c("norm","pmm")){
 for (n in c(30, 100, 200, 300, 400, 500)){print(paste0("n=",n))
+for (M in c(5, 10, 25)){print(paste0("m=",M))
 for (j in 1:nsim){print(j)
 # create dataset
 #multivariate normal setting
@@ -34,9 +33,6 @@ mu <- c(0, 0)
 #correlation 0.5
 sigma <- matrix(c(1, rho, rho, 1), nrow = 2)
 dat <- as.data.frame(mvtnorm::rmvnorm(n=n, mean=mu, sigma = sigma))
-
-#Skewed data 
-dat$V1 <- qchisq(pnorm(dat$V1), 5)
 
 #Skewed data 
 #dat$V1 <- qchisq(pnorm(dat$V1), 5)
@@ -70,27 +66,22 @@ if (missing_type == "MCAR"){
 }
 
 
+# impute data
+imputed <- mice(dat_missing, print=FALSE, m=M, method = method)
 
-for (method in c("norm","pmm")){
-
-#impute data
-imputed <- mice(dat_missing, print=FALSE, m=100, method = method)  
-imp_data_stacked <- complete(imputed, "long")
-imp_data_stacked$M <- imp_data_stacked$.imp
-  
-  for (M in c(5, 10, 25,50,100)){print(paste0("m=",M))
-    
 #Complete the M imputed data sets
-imp_dens_stacked  <- data.frame()
+imp_dens_stacked <- imp_data_stacked <- data.frame()
 for (i in 1:M){
+imp_data <- complete(imputed, i)
+imp_data$M <- i
+imp_data_stacked <- bind_rows(imp_data_stacked, imp_data)
 
 #Density function uses method "nrd0" by default for computing bandwidth
-imp_dens <- data.frame(x=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=512)$x,
-                       y=density(imp_data_stacked$V1[imp_data_stacked$M == i], from=-3, to=18, n=512)$y)
+imp_dens <- data.frame(x=density(imp_data$V1, from=-3, to=3, n=512)$x,
+                       y=density(imp_data$V1, from=-3, to=3, n=512)$y)
 imp_dens$M <- i
 imp_dens_stacked <- bind_rows(imp_dens_stacked, imp_dens)
 }
-
 
 
 #ggplot(aes(x = x, y= y, group = as.factor(M)), data = imp_dens_stacked) + geom_path(color = rgb(0,0,0,0.25)) + theme_bw()
@@ -242,11 +233,9 @@ results_df  <- bind_rows(results_df,as.data.frame(do.call(rbind,results_list))  
 }
 }
 
-end <- Sys.time()
-save(results_df, file = "/Users/maynorman/Desktop/fish-impute-git/results_20250922_mar_norm.RData")
 
-time <- end-start
-print(time)
+#save(results_df, file = "/Users/gregorymatthews/Dropbox/fishimputegit/results_MCAR_normal.RData")
+
 
 results_df %>% mutate(name = substring(name,1,4)) %>% group_by(name, M, n, method, missing_type) %>% summarize(-log(mean(value))) %>% View()
 results_df %>% mutate(name = substring(name,1,4)) %>% ggplot(aes(x = as.factor(name), y = -log(value), color = as.factor(n))) + geom_boxplot() + facet_grid(M~method,scales="free_y") 
