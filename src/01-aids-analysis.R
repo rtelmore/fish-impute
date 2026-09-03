@@ -11,16 +11,25 @@ fd <- ACTG175 |>
   select(age, wtkg, treat, cd40, cd420, treat, cd496) |> 
   mutate(diff = cd496 - cd40)
 
+## What's the percentage missing? 
+apply(fd, 2, function(x) sum(is.na(x)))
+797/2129
+#37.4%
+
 ## Incomplete case KDE
 
 p <- ggplot(data = fd |> na.omit(),
             aes(x = diff))
-p + geom_histogram(aes(y = after_stat(density)), fill = "grey", col = "black") +
+p + geom_histogram(aes(y = after_stat(density)), 
+                   fill = "grey", 
+                   col = "black",
+                   alpha = .65) +
   geom_density() +
   scale_x_continuous(breaks = seq(-600, 800, by = 100)) +
   labs(x = "CD4 at 96 weeks minus CD4 at Baseline",
        y = "Kernel Density Estimate") +
-  theme_bw()
+  theme_minimal()
+ggsave("fig/aids-kde-complete-case.pdf", height = 6, width = 8)
 
 ## Impute Missing Values
 
@@ -34,17 +43,22 @@ imputed <- mice(fd_sub,
 
 fd_imputed <- complete(imputed, action = "long")
 
+
 ## Just showing all 10
 p <- ggplot(data = fd |> na.omit(),
             aes(x = diff))
-p + geom_histogram(aes(y = after_stat(density)), fill = "grey", col = "black") +
+p + geom_histogram(aes(y = after_stat(density)), 
+                   fill = "grey80", 
+                   col = "black",
+                   alpha = .65) +
   geom_density(data = fd_imputed,
-               aes(x = diff, group = .imp), col = "red", linetype = "dashed") +
+               aes(x = diff, group = .imp), linetype = "dashed") +
   geom_density() +
   scale_x_continuous(breaks = seq(-600, 800, by = 100)) +
   labs(x = "CD4 at 96 weeks minus CD4 at Baseline",
        y = "Kernel Density Estimate") +
-  theme_bw()
+  theme_minimal()
+ggsave("fig/aids-kde-imputed.pdf", height = 6, width = 8)
 
 rm(result)
 for (i in 1:m){
@@ -63,17 +77,20 @@ for (i in 1:m){
 ## Average KDE
 result <- result |> 
   group_by(x) |> 
-  summarize(y = mean(y))
+  summarize(y = mean(y)) |> 
+  ungroup()
 
-p + geom_histogram(aes(y = after_stat(density)), fill = "grey80", col = "black") +
+p + geom_histogram(aes(y = after_stat(density)), 
+                   fill = "grey80", 
+                   col = "black",
+                   alpha = .65) +
   geom_line(data = result,
             aes(x = x, y = y), 
-            col = "red", 
             linetype = "dashed") +
   geom_density() +
   scale_x_continuous(breaks = seq(-600, 800, by = 200)) +
   scale_y_continuous(breaks = seq(0, 0.003, by = .0005)) +
   labs(x = "CD4 at 96 weeks minus CD4 at Baseline",
        y = "Kernel Density Estimate") +
-  theme_bw()
-ggsave("fig/aids-kdes.pdf", height = 6, width = 8)
+  theme_minimal()
+ggsave("fig/aids-kdes-average.pdf", height = 6, width = 8)
