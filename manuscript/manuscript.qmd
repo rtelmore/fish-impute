@@ -14,7 +14,18 @@ author:
     affiliations:
       - name: University of Denver
         department: Department of Business Information and Analytics
+        
   - name: Gregory J. Matthews
+    affiliations:
+      - name: Loyola University Chicago
+        department: Department of Mathematics and Statistics
+  
+  - name: Sean Kerr
+    affiliations:
+      - name: Loyola University Chicago
+        department: Department of Mathematics and Statistics
+  
+  - name: May Norman
     affiliations:
       - name: Loyola University Chicago
         department: Department of Mathematics and Statistics
@@ -41,52 +52,71 @@ When data are fully observed there are a host of methods for estimating the prob
 
 Saloui: https://www.tandfonline.com/doi/abs/10.1080/03610926.2016.1205618
 
+
+
 ## Sim settings {#sec-sim}
 
-Sample size?
-Number of imputations?
-Imputation method: pmm, norm, etc?
+A Monte Carlo simulation study was conducted to evaluate the performance of multiple-imputation methods for using kernel density estimation to accurately estimate the true underlying distribution of a partially observed variable. 
+Data were generated for sample sizes of $n$ = 30, 100, 200, 300, 400, 500, with 1000 Monte Carlo replications for each sample size.  In each replication, data were generated from a bivariate normal distribution with mean $\boldsymbol{\mu}=(0,0)$, variances of 1, and correlation $\rho$.  Two values of $\rho$ were considered: 0.25 and 0.5.  
 
-True Distribution of Y: 
-1. Normal
-2. Chi squared
-3. Mixture of Normals
+Three target types of target distributions were considered: 
+ 1. Symmetric: Normal with $\mu = 0$ and $\sigma^2 = 1$
+ 2. Skewed: $\chi^2_5$
+ 3. Bimodal: Normal mixture with $N(1,1)$ and $N(5,4)$ and mixing proportions 0.3 and 0.7, respectively.  
 
-Missingness: 
-1. MCAR
-2. MAR
-3. MNAR?????
+To create a skewed target distribution, the first variable was transformed using the probability integral transform followed by the inverse chi-square distribution function with 5 degrees of freedom, yielding a skewed $\chi^2_5$-distributed variable while preserving its rank relationship with the second variable.  The process for creating the normal mixture target distribution followed the same process.  In all cases the data consisted of a sample of size $n$ with two varaibles with the first variable being the target density and the second variable always being normally distributed. 
 
-Missing rate: 
-1. Low 15ish
-2. Medium 30ish
-3. High 50ish
+Missingness was then introduced into the first variable under a  missing-at-random (MAR) mechanism (Note: We also did this with MCAR, but MCAR is very uninteresting).  The probabilities of missingness of the first variable were 20\% and 80\% for observation below and above the median of the second variable, respectively.  Using this setup, the goal of this simulation is to test how well the true density can be recovered using multiple imputation techniques when the target marginal distribution has substantial asymmetric missingness. 
 
-Combining Rules: 
-1. stacking and then one density estimate
-2. estimating and the combining 
+All missing values were imputed using the multiple imputation via chained equation (MICE), which was implemented using the $\texttt{mice}$ package in R (@vanBuuren2011).  Two methods for imputation were explored: 
+ 
+ 1. Bayesian linear regression ($\texttt{norm}$ option in $\texttt{mice}$)
+ 2. Predictive mean matching ($\texttt{pmm}$ option in $\texttt{mice}$) (@little1988missing)
+ 
+$M$ imputations were generated for each data set for values $M$ = 5, 10, 25, 50, and 100 to evaluate how the number of imputations affects the accuracy of the density recovery.  In practice, a single set of $M$ = 100 imputation were performed and then only the first 5 were used for $M$ = 5, the first 10 were used for $M$ = 10, etc. for better comparisons across different numbers of imputations. 
+
+Kernel density estimation was performed using four different approaches: 
+
+ 1. Kernel density estimates are computed individually for each of the $M$ imputations and then values of $\hat{f}_m(x)$, for each value of $x$ are averaged across imputations to create a combined density estimate $\hat{f}(x)  = \frac{1}{M}\sum_{m=1}^M \hat{f}_m(x)$.  
+ 2. The bandwith estimator nrd0 (@silverman1986density) was computed separately for each imputated data set.  These values are averaged across imputations.  All imputations are stacked together and then a single density estimate is computed using the combined nrd0 bandwidth estimator.  3. Combining method 3 is the same as 2, but the combining across imputations occurs prior to the computation of nrd0. Here, the values of IQR and the standard deviation, both components of nrd0, are combined across imputations.  These combined values are then used to calculate a single value of nrd0.  The imputations are stacked as in Method 2 and the single value of nrd0 is used as the bandwidth in density estimation. 
+ 4. The $M$ imputations are stacked on top of each other and treated as a data set of size $M \times n$ and ignoring the imputation labeling.  Density estimation proceeds on this stacked data set.  
+ 
+ 
+$$
+nrd0 = 0.9 \cdot \min\left(\text{sd}(x), \frac{\text{IQR}(x)}{1.34}\right) \cdot n^{-\frac{1}{5}}
+$$
+Density estimates were evaluated on a common grid of 2048 points.
+Performance was evaluated by comparing each estimated density with the known true density, either normal, $\chi^2_5$, or normal mixture. As benchmarks, the empirical kernel density obtained from the fully observed data before missing was introduced and the density obtained from the observed, incomplete data were also evaluated. The primary performance measure was the integrated squared discrepancy between the estimated and true density, approximated numerically over the evaluation grid.
+
+$$
+\int_{-\infty}^{\infty} (\hat{f}(x) - f(x))^2 dx
+$$
+Specifically, the integral was approximated as the sum of the squared differences between the estimated and true density values, multiplied by the grid spacing. Smaller values of this quantity indicate better recovery of the true distribution.
+
+Simualtion results were summarized across replications as a function of sample size (n), number of imputations (M), imputation method (norm or pmm), and combining method (methods 1-4 described above).  
 
 
 
-## Describe the combining rules
 
-Methods: 
- - Stack
+Note: Some note about how combining estimates across imptuations still gives us a true density.  We need this for method 1 to be valid.  The other methods don't need this.  
 
-Suppose we have $B$ imputed data sets and we estimate $f$ using a standard kernel density estimator given by 
+Suppose we have $M$ imputed data sets and we estimate $f$ using a standard kernel density estimator given by 
 
 \begin{equation}
 \label{eqn:kde}
-\hat{f_b}(x) = \frac1{nh_b}K\left(\frac{x - x_i}{h_b}\right) \ \ b = 1, 2 \dots, B, 
+\hat{f_m}(x) = \frac1{nh_m}K\left(\frac{x - x_i}{h_m}\right) \ \ m  = 1, 2 \dots, M, 
 \end{equation}
-where $K$ is an appropriately chosen kernel function and $h_b$ is a bandwidth select, see \citet{simonoff2012smoothing} for more details. We propose to estimate $f$ by averaging over the individual $B$ estimators, that is 
+where $K$ is an appropriately chosen kernel function and $h_m$ is a bandwidth,see @simonoff2012smoothing for more details. We propose to estimate $f$ by averaging over the individual $M$ estimators, that is 
 \begin{equation}
 \label{eqn:kde_combo}
-\hat{f}(x) = \frac1B\sum_{b=1}^B\hat{f}_b.
+\hat{f}(x) = \frac{1}{M}\sum_{m=1}^M\hat{f}_m(x).
 \end{equation}
-Clearly, $\hat{f}$ is a proper density in that each individual density estimator $\hat{f}_b$ integrates to one and is non-negative everywhere. 
+
+Clearly(Clearly!?!?!), $\hat{f}$ is a proper density in that each individual density estimator $\hat{f}_m$ integrates to one and is non-negative everywhere. 
 
 ## Methods {#sec-meth}
+
+## Results
 
 ## Real data
 Fish: 
