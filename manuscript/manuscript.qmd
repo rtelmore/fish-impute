@@ -39,6 +39,10 @@ bibliography: bibliography.bib
 
 <!-- Note: Possible journals to submit to: CSDA  -->
 
+```{r setup, include=FALSE}
+# This sets the working directory for all chunks back one level to the project root
+knitr::opts_knit$set(root.dir = "..")
+```
 
 ## Introduction {#sec-intro}
 
