@@ -66,7 +66,7 @@ Three target types of target distributions were considered:
 
 To create a skewed target distribution, the first variable was transformed using the probability integral transform followed by the inverse chi-square distribution function with 5 degrees of freedom, yielding a skewed $\chi^2_5$-distributed variable while preserving its rank relationship with the second variable.  The process for creating the normal mixture target distribution followed the same process.  In all cases the data consisted of a sample of size $n$ with two varaibles with the first variable being the target density and the second variable always being normally distributed. 
 
-Missingness was then introduced into the first variable under a  missing-at-random (MAR) mechanism (Note: We also did this with MCAR, but MCAR is very uninteresting).  The probabilities of missingness of the first variable were 20\% and 80\% for observation below and above the median of the second variable, respectively.  Using this setup, the goal of this simulation is to test how well the true density can be recovered using multiple imputation techniques when the target marginal distribution has substantial asymmetric missingness. 
+Missingness was then introduced into the first variable under a  missing-at-random (MAR) mechanism (Note: We also did this with MCAR, but MCAR is very uninteresting).  The probabilities of missingness of the first variable were 80\% and 20\% for observation below and above the median of the second variable, respectively.  In addition, for the $\chi^2_5$ setting, we also ran a missing data scenario where the heavy missingness was in the upper tail of the distribution.  In this single case, the first variable was missing 80\% of data when the value of the second variable was *above* the median of the second variable and only 20\% of the data in variable one was missing when varaible two was below the median.  Using this setup, the goal of this simulation is to test how well the true density can be recovered using multiple imputation techniques when the target marginal distribution has substantial asymmetric missingness. 
 
 All missing values were imputed using the multiple imputation via chained equation (MICE), which was implemented using the $\texttt{mice}$ package in R (@vanBuuren2011).  Two methods for imputation were explored: 
  
@@ -117,6 +117,151 @@ Clearly(Clearly!?!?!), $\hat{f}$ is a proper density in that each individual den
 ## Methods {#sec-meth}
 
 ## Results
+
+The simulation results demonstrated substantial variation in the ability to accurately recover the density across different true densities, sample sizes, and imputation methods.  The accuracy of results does not vary appreciably across the  number of imputations used and the combining methods proposed here.  
+
+<!-- chatgpt  -->
+The simulation results demonstrated substantial variation in the outcome measure across the underlying data-generating distributions, sample sizes, numbers of imputations, and imputation approaches. Across all simulation conditions, the outcome measure was smallest for the complete (Original) data, with a mean value of approximately 0.00054, whereas the introduction of missing data increased the mean value to approximately 0.00065. The imputation approaches generally reduced this discrepancy relative to the missing-data analysis, although the magnitude of improvement depended on the distributional form and imputation method.
+
+The four primary imputation approaches (Imp1–Imp4) produced highly similar results overall. Under the normal imputation method, their mean outcome values ranged from approximately 0.000610 to 0.000610, while under predictive mean matching (PMM), mean values ranged from approximately 0.000611 to 0.000617. Thus, differences among Imp1–Imp4 were generally small, particularly as sample size increased. Imp5 produced substantially larger values than the other imputation approaches, with mean values of approximately 0.00227 under normal imputation and 0.00217 under PMM.
+
+Performance varied considerably across the four distributional conditions. The largest outcome values occurred under the mixture distribution, for which the mean values for Imp1–Imp4 were approximately 0.00220. In contrast, substantially smaller values were observed for the normal and chi-square distributions. This pattern indicates that the mixture distribution represented the most challenging simulation condition for the imputation procedures, whereas performance was comparatively stable under the simpler unimodal distributions.
+
+Sample size had a clear effect on performance. Averaging across other simulation conditions, the mean outcome values for Imp1–Imp4 decreased from approximately 0.00076–0.00078 when \(n=30\) to approximately 0.00056 when \(n=500\). The largest improvements occurred between the smallest sample sizes, with the outcome measure becoming increasingly stable as sample size increased beyond approximately \(n=200\).
+
+The number of imputations had comparatively little effect once more than two imputations were used. Mean outcome values were approximately 0.00017–0.00018 when \(M=2\), but were relatively stable for \(M\) values between 5 and 100, ranging from approximately 0.00062 to 0.00063. Differences among Imp1–Imp4 also became negligible as the number of imputations increased.
+
+The level of correlation had only a modest influence on the results. Across the primary imputation approaches, mean values were slightly lower when the correlation was 0.25 (approximately 0.00060) than when the correlation was 0.50 (approximately 0.00063). Overall, however, this difference was small relative to the variation attributable to the distributional form and sample size.
+
+Comparisons between the normal imputation model and PMM suggested that neither approach was uniformly superior across all data-generating distributions. For the chi-square distribution, PMM generally produced smaller outcome values than the normal imputation approach. Conversely, the normal imputation method performed better under the normal distribution. Both approaches produced similar results under the mixture distribution, although PMM showed a modest advantage on average. These findings suggest that the relative performance of the imputation methods depended on the compatibility between the imputation model and the underlying distribution of the data.
+
+Overall, the results indicate that the primary imputation approaches produced broadly comparable results and that increasing sample size was associated with improved performance. The underlying distribution had the strongest influence on the magnitude of the outcome measure, with mixture distributions presenting substantially greater challenges than normal or chi-square distributions. The comparison between normal imputation and PMM further suggests that no single imputation method consistently dominated across all simulation conditions.
+
+If you tell me **what `value` measures** (e.g., MSE, integrated squared error, density estimation error, bias, etc.) and what **Imp1–Imp5 specifically represent**, I can make this substantially more precise and write it in a publication-ready style.
+
+
+```{r}
+library(tidyverse)
+#Cor is 0.5 here 
+load("./src/results_20250829_mar_norm.RData")
+results_df$cor <-  0.5
+results_df$type <-  "normal"
+results_df_normal_50 <- results_df
+
+load("./src/results_20250903_mar_norm_cor25.RData")
+results_df$cor <-  0.25
+results_df$type <-  "normal"
+results_df_normal_25 <- results_df
+
+load("./src/results_mar_chisq_0.5.RData")
+results_df$cor <-  0.5
+results_df$type <-  "chisq"
+results_df_chisq_50 <- results_df
+
+load("./src/results_mar_chisq_0.25.RData")
+results_df$cor <-  0.25
+results_df$type <-  "chisq"
+results_df_chisq_25 <- results_df
+
+load("./src/results_mar_chisq_0.5_reversemissing.RData")
+results_df$cor <-  0.5
+results_df$type <-  "chisq_upper"
+results_df_chisq_upper_50 <- results_df
+
+load("./src/results_mar_chisq_0.25_reversemissing.RData")
+results_df$cor <-  0.25
+results_df$type <-  "chisq_upper"
+results_df_chisq_upper_25 <- results_df
+
+load("./src/results_mar_mixture_0.5.RData")
+results_df$cor <-  0.5
+results_df$type <-  "mixture"
+results_df_mixture_50 <- results_df
+
+load("./src/results_mar_mixture_0.25.RData")
+results_df$cor <-  0.25
+results_df$type <-  "mixture"
+results_df_mixture_25 <- results_df
+
+results_all <- bind_rows(results_df_normal_25, 
+          results_df_normal_50,
+          results_df_chisq_25,
+          results_df_chisq_50,
+          results_df_chisq_upper_50,
+          results_df_chisq_upper_25,
+          results_df_mixture_50, 
+          results_df_mixture_25 
+          )
+
+pal <- c("gray","gray","gray","gray","darkred","darkgreen")
+results_all %>% 
+  group_by(name, M, n, method, cor, type) %>%
+  summarize(xbar = mean(value),
+            median = median(value),
+            sd = sd(value)) %>% filter(cor == 0.25 & type == "normal" & M == 100) %>% 
+  ggplot(aes(x = n, y = -log(median), color = name, group = name)) + facet_grid(~method) + geom_point() + geom_line() + theme_bw() + scale_color_discrete(palette = pal)
+```
+
+```{r}
+results_all %>% 
+  group_by(name, M, n, method, cor, type) %>%
+  summarize(xbar = mean(value),
+            median = median(value),
+            sd = sd(value)) %>% filter(cor == 0.5 & type == "normal" & M == 100) %>% 
+  ggplot(aes(x = n, y = -log(median), color = name, group = name)) + facet_grid(~method) + geom_point() + geom_line() + theme_bw() + scale_color_discrete(palette = pal)
+```
+
+```{r}
+results_all %>% 
+  group_by(name, M, n, method, cor, type) %>%
+  summarize(xbar = mean(value),
+            median = median(value),
+            sd = sd(value)) %>% filter(cor == 0.25 & type == "chisq" & M == 100) %>% 
+  ggplot(aes(x = n, y = -log(median), color = name, group = name)) + facet_grid(~method) + geom_point() + geom_line() + theme_bw() + scale_color_discrete(palette = pal)
+```
+
+```{r}
+results_all %>% 
+  group_by(name, M, n, method, cor, type) %>%
+  summarize(xbar = mean(value),
+            median = median(value),
+            sd = sd(value)) %>% filter(cor == 0.5 & type == "chisq" & M == 100) %>% 
+  ggplot(aes(x = n, y = -log(median), color = name, group = name)) + facet_grid(~method) + geom_point() + geom_line() + theme_bw() + scale_color_discrete(palette = pal)
+```
+
+```{r}
+#write.csv(results_all, file = "/Users/gregorymatthews/Dropbox/resultsfish.csv")
+
+#Normal
+pal <- c("gray","gray","gray","gray","darkred","darkgreen")
+results_all %>% filter(M == 100 & cor == 0.25 & method == "norm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal norm Cor = 0.25 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.25 & method == "pmm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal pmm Cor = 0.25 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.25 & method == "norm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal norm Cor = 0.5 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.25 & method == "pmm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal pmm Cor = 0.5 M = 100") + theme_bw()
+
+
+
+#Chi sq
+pal <- c("gray","gray","gray","gray","darkred","darkgreen")
+results_all %>% filter(M == 100 & cor == 0.25 & method == "norm" & value < 0.1 & type == "chisq") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("chisq norm Cor = 0.25 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.25 & method == "pmm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal pmm Cor = 0.25 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.5 & method == "norm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal norm Cor = 0.5 M = 100")
+
+results_all %>% filter(M == 100 & cor == 0.5 & method == "pmm" & value < 0.1 & type == "normal") %>% ggplot(aes(x = as.factor(n), y = -log(value), color = name)) + geom_boxplot() + scale_color_discrete(palette = pal) + ggtitle("Normal pmm Cor = 0.5 M = 100") + theme_bw()
+
+
+
+
+
+# results_all %>%  filter(cor == 0.25 & name %in% c("Missing","Original","Imp1") & n %in% c(30,100,200,500) & M == 100 & value <0.1 & type == "normal") %>% ggplot(aes(x = as.factor(M), y = -log(value), color = name)) + geom_boxplot(outliers = FALSE) + facet_grid( n ~ method) + theme_bw()
+
+```
+
 
 ## Real data
 Fish: 
